@@ -1,6 +1,8 @@
 const {Client, Intents} = require('discord.js');
 const dotenv = require('dotenv')
 const { MessageEmbed } = require('discord.js');
+const puppeteer = require('puppeteer-extra');
+const pluginStealth = require('puppeteer-extra-plugin-stealth');
 
 dotenv.config()
 
@@ -35,6 +37,8 @@ client.on('messageCreate', msg=>{
     let sentinel_agent = ['Sage', 'Killjoy', 'Cypher', 'Chamber']
     let controller_agent = ['Astra', 'Brimstone', 'Omen', 'Viper']
     let initiator_agent = ['KAY/O', 'Sova', 'Skye', 'Breach']
+    if (msg.content == 'v!stats'){
+        scrapeProduct("https://tracker.gg/valorant/profile/riot/Belle王女%23べっぇ/overview?season=all")}
     if (msg.content == 'ra!duelist'){
         let char = duelist_agent[random_due()]
         if(char == "Jett"){
@@ -94,7 +98,7 @@ client.on('messageCreate', msg=>{
             
         }
     }
-    
+
     if (msg.content == 'ra!sentinel'){
         let char = sentinel_agent[random_sen()]
         if(char == 'Sage'){
@@ -426,6 +430,213 @@ client.on('messageCreate', msg=>{
             msg.reply({ embeds: [embed_ini3] });
 }
     }
+async function scrapeProduct(url) {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(url);
+//Kill
+    const [el] = await page.$x('//*[@id="app"]/div[2]/div[2]/div/main/div[2]/div[3]/div[3]/div[2]/div[5]/div[2]/div/div[2]/span[2]');
+    const raw_kill = await el.getProperty('textContent');
+    const Kills = await raw_kill.jsonValue();
+//Win
+    const [el2] = await page.$x('//*[@id="app"]/div[2]/div[2]/div/main/div[2]/div[3]/div[3]/div[2]/div[5]/div[1]/div/div[2]/span[2]');
+    const raw_win = await el2.getProperty('textContent');
+    const Wins = await raw_win.jsonValue();
+//Headshot
+    const [el3] = await page.$x('//*[@id="app"]/div[2]/div[2]/div/main/div[2]/div[3]/div[3]/div[2]/div[5]/div[3]/div/div[1]/span[2]');
+    const raw_hs = await el3.getProperty('textContent');
+    const Headshots = await raw_hs.jsonValue();
+//death
+    const [el4] = await page.$x('//*[@id="app"]/div[2]/div[2]/div/main/div[2]/div[3]/div[3]/div[2]/div[5]/div[4]/div/div[1]/span[2]');
+    const raw_death = await el4.getProperty('textContent');
+    const Deaths = await raw_death.jsonValue();
+//KD ratio
+    const [el5] = await page.$x('//*[@id="app"]/div[2]/div[2]/div/main/div[2]/div[3]/div[3]/div[2]/div[3]/div[2]/div/div[2]/span[2]');
+    const raw_kdrate = await el5.getProperty('textContent');
+    const KDrate = await raw_kdrate.jsonValue();
+//KAD ratio
+    const [el6] = await page.$x('//*[@id="app"]/div[2]/div[2]/div/main/div[2]/div[3]/div[3]/div[2]/div[2]/div[2]/div/div[1]/div[2]/span[2]');
+    const raw_kadrate = await el6.getProperty('textContent');
+    const KADrate = await raw_kadrate.jsonValue();
+//HS ratio
+    const [el7] = await page.$x('//*[@id="app"]/div[2]/div[2]/div/main/div[2]/div[3]/div[3]/div[2]/div[3]/div[3]/div/div[2]/span[2]');
+    const raw_hsrate = await el7.getProperty('textContent');
+    const HSrate = await raw_hsrate.jsonValue();
+//Assist
+    const [el8] = await page.$x('//*[@id="app"]/div[2]/div[2]/div/main/div[2]/div[3]/div[3]/div[2]/div[5]/div[5]/div/div[1]/span[2]');
+    const raw_assist = await el8.getProperty('textContent');
+    const Assists = await raw_assist.jsonValue();
+//Win rate
+    const [el9] = await page.$x('//*[@id="app"]/div[2]/div[2]/div/main/div[2]/div[3]/div[3]/div[2]/div[3]/div[4]/div/div[2]/span[2]');
+    const raw_winrate = await el9.getProperty('textContent');
+    const Winrate = await raw_winrate.jsonValue();
+//Playtime
+    const [el10] = await page.$x('//*[@id="app"]/div[2]/div[2]/div/main/div[2]/div[3]/div[3]/div[2]/div[1]/div/div/span[1]');
+    const raw_playtime = await el10.getProperty('textContent');
+    const Playtime = await raw_playtime.jsonValue();
+//Matches
+    const [el11] = await page.$x('//*[@id="app"]/div[2]/div[2]/div/main/div[2]/div[3]/div[3]/div[2]/div[1]/div/div/span[2]');
+    const raw_match = await el11.getProperty('textContent');
+    const Matches = await raw_match.jsonValue();
+//Rank Img
+    const [rank_img] = await page.$x('//*[@id="app"]/div[2]/div[2]/div/main/div[2]/div[3]/div[3]/div[2]/div[2]/div[2]/div/div[1]/img');
+    const rank_pic = await rank_img.getProperty('src');
+    const rank = await rank_pic.jsonValue();
+
+    console.log({rank})
+    console.log({Playtime, Matches, Wins, Winrate, Kills, Deaths, Assists, KDrate, KADrate, Headshots, HSrate});
+
+    stats = {Playtime, Matches, Wins, Winrate, Kills, Deaths, Assists, KDrate, KADrate, Headshots, HSrate}
+	rank_url = {rank}
+
+    let text = "";
+    for (const x in stats) {
+      text += x + " : ";
+      text += stats[x] + "\n";
+    }
+	let logo = "";
+	logo += rank
+	console.log(text)
+	console.log(logo)
+
+	const statsEmbed = new MessageEmbed()
+	.setTitle("Belle王女#べっぇ's Stats")
+	.setThumbnail(logo)
+	.setDescription(text)
+	.setURL("https://tracker.gg/valorant/profile/riot/Belle王女%23べっぇ/overview?season=all")
+	.setColor("#FFFFFF")
+	.setTimestamp()   
+    msg.channel.send({embeds: [statsEmbed]})
+        browser.close();
+    
+    }
+    const logo = "https://media.discordapp.net/attachments/910120569964490773/910133631383638026/Lm-l7Ldr_400x400.png"
+    const ascentEmbed = new MessageEmbed()
+        .setTitle("Ascent")
+        .setThumbnail(logo)
+        .setURL("https://valorant.fandom.com/wiki/Ascent")
+        .setColor("#dea34e")
+        .addFields(
+            {name: "Introduce", value: "Ascent is a map set in Italy that features a large, open middle area that both teams can skirmish over. Mid is a playground for diverse ability use and successfully controlling the area opens additional routes for Attackers to both Spike sites."},
+            {name: "Guide (EN)", value: "https://youtu.be/9MjW98TDkNY"}
+        )
+        .setImage("https://media.discordapp.net/attachments/910120569964490773/910140205904842783/latest.png")
+        .setTimestamp()
+
+    const bindEmbed = new MessageEmbed()
+        .setTitle("Bind")
+        .setThumbnail(logo)
+        .setURL("https://valorant.fandom.com/wiki/Bind")
+        .setColor("#91682c")
+        .addFields(
+            {name: "Introduce", value: "Bind\'s unique feature is that it doesn\'t contain a mid section, instead having two one-way teleporters. One takes players from A Short to B Short and the other takes players from B Long to A Lobby."},
+            {name: "Guide (EN)", value: "https://youtu.be/b0zyIRv81Oc"}
+        )
+        .setImage("https://media.discordapp.net/attachments/910120569964490773/910140703324127232/latest.png")
+        .setTimestamp()
+
+    const breezeEmbed = new MessageEmbed()
+        .setTitle("Breeze")
+        .setThumbnail(logo)
+        .setURL("https://valorant.fandom.com/wiki/Breeze")
+        .setColor("#56dff5")
+        .addFields(
+            {name: "Introduce", value: "Breeze\'s unique features are present on the A side of the map, mostly to do with A Hall. There are ropes to get players into A Hall. On the defending side players can use the rope at the back of A Site to get onto Bridge and into Hall, and on the attacking side players can use the rope in A Lobby to get into Hall."},
+            {name: "Guide (EN)", value: "https://youtu.be/vrKPcTaN6Rg"}
+        )
+        .setImage("https://cdn.discordapp.com/attachments/910120569964490773/910140766465167390/latest.png")
+        .setTimestamp()
+
+    const fractureEmbed = new MessageEmbed()
+        .setTitle("Fracture")
+        .setThumbnail(logo)
+        .setURL("https://valorant.fandom.com/wiki/Fracture")
+        .setColor("#64adde")
+        .addFields(
+            {name: "Introduce", value: "Fracture\'s unique design splits up the map into four neutral quadrants, four central areas between the quadrants that contain the sites and Attacker spawns, and a central zone where Defenders spawn. On Round Start, Defenders can access the sites, which are on opposite sides of the map. Attackers all spawn in one area, but can reach the other side by using the cross-map ziplines that take them underneath Defender Spawn. During the Buy Phase, Defenders are unable to hear Attackers using the ziplines."},
+            {name: "Guide (EN)", value: "https://youtu.be/qpI2vTmjA2M"}
+        )
+        .setImage("https://cdn.discordapp.com/attachments/910120569964490773/910140775533269012/latest.png")
+        .setTimestamp()
+
+    const havenEmbed = new MessageEmbed()
+        .setTitle("Haven")
+        .setThumbnail(logo)
+        .setURL("https://valorant.fandom.com/wiki/Haven")
+        .setColor("#5ef830")
+        .addFields(
+            {name: "Introduce", value: "Haven\'s unique feature is that it has an additional third spike site. This does not affect the number of ultimate orbs on the map; Haven\'s two ultimate orbs are present in A Long and C Long (Dragon)."},
+            {name: "Guide (EN)", value: "https://youtu.be/XkmNf2rjN24"}
+        )
+        .setImage("https://cdn.discordapp.com/attachments/910120569964490773/910140822433964062/latest.png")
+        .setTimestamp()
+
+    const iceboxEmbed = new MessageEmbed()
+        .setTitle("Icebox")
+        .setThumbnail(logo)
+        .setURL("https://valorant.fandom.com/wiki/Icebox")
+        .setColor("#80ffee")
+        .addFields(
+            {name: "Introduce", value: "Icebox is the first map to introduce horizontal ziplines, seen at the A Site. Each Icebox site is a complex combat space that features plenty of cover and verticality. This map emphasizes skirmishes, sharp aim, and adaptive play."},
+            {name: "Guide (EN)", value: "https://youtu.be/aX39lspy7DM"}
+        )
+        .setImage("https://media.discordapp.net/attachments/910120569964490773/910140894731182110/latest.png")
+        .setTimestamp()
+
+    const splitEmbed = new MessageEmbed()
+        .setTitle("Split")
+        .setThumbnail(logo)
+        .setURL("https://valorant.fandom.com/wiki/Split")
+        .setColor("#4ede79")
+        .addFields(
+            {name: "Introduce", value: "Split was the first map to use ascenders. There are three sets on the map."},
+            {name: "Guide (EN)", value: "https://youtu.be/8M5VIT0zP7I"}
+        )
+        .setImage("https://cdn.discordapp.com/attachments/910120569964490773/910140917166518342/latest.png")
+        .setTimestamp()
+    if (msg.content === 'v!ascent'){
+		msg.reply({embeds:[ascentEmbed]})
+	}
+	if (msg.content === 'v!bind'){
+		msg.reply({embeds:[bindEmbed]})
+	}
+	if (msg.content === 'v!breeze'){
+		msg.reply({embeds:[breezeEmbed]})
+	}
+	if (msg.content === 'v!fracture'){
+		msg.reply({embeds:[fractureEmbed]})
+	}
+	if (msg.content === 'v!haven'){
+		msg.reply({embeds:[havenEmbed]})
+	}
+	if (msg.content === 'v!icebox'){
+		msg.reply({embeds: [iceboxEmbed]})
+	}
+	if (msg.content === 'v!split'){
+		msg.reply({embeds: [splitEmbed]})
+	}
+
+    
 })
+client.on('messageCreate', msg=>{
+
+	const helpEmbed = new MessageEmbed()
+	.setTitle("V-Project Help/Commands")
+	.setThumbnail("https://media.discordapp.net/attachments/910120569964490773/910133631383638026/Lm-l7Ldr_400x400.png")
+	.setColor("#f41414")
+	.addFields(
+		{name: "v!stats", value: "Check Stats for Valorant Players"},
+		{name: "v! (agent's name)", value: "Introduce each agent in Valorant ,Example : v!Jett"},
+		{name: "v! (map's name)", value: "Introduce each map in Valorant ,Example : v!ascent"},
+		{name: "ra! (agent's roles)", value: "random agent in Valorant for each role, Example : ra!sentinel"}
+	)
+	.setTimestamp()
+
+	if (msg.content === 'v!help')
+	{
+		msg.reply({embeds: [helpEmbed]})
+	}
+})
+
 
 client.login(process.env.TOKEN)
